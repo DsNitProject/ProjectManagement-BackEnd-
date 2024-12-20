@@ -1,6 +1,13 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String,Enum as sqlEnum
 from BackEnd.database.database import Base
+from enum import Enum
+
+
+
+class UserRole(Enum):
+    admin = "admin"
+    user = "user"
+
 
 class User(Base):
     __tablename__ = "users"
@@ -9,7 +16,5 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
-    skills = Column(String, nullable=True)
-    role = Column(String, default="member")  # roles: admin, manager, member
+    role = Column(sqlEnum(UserRole), default=UserRole.user, nullable=False)
 
-    tasks = relationship("Task", back_populates="assignee")
