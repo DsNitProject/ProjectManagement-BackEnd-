@@ -1,13 +1,31 @@
-from fastapi import APIRouter, Depends, Request
+from os import access
+
+from BackEnd.CRUD.user_crud import get_user_by_email, create_user
+from BackEnd.schemas import Token, Login, UserCreate, UserRole, UserResponse
+
+from fastapi import APIRouter, Depends, Request, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from BackEnd.database.database import Session, get_db
-from BackEnd.routers.oauth2 import oauth2_scheme
-from BackEnd.schemas.user import UserRegister
+from BackEnd.routers.oauth2 import oauth2_scheme, create_access_token
+from BackEnd.utils.hash import Hash
 
 router = APIRouter(prefix="/authuser", tags=["authuser"])
 
-@router.post("/token")
-def get_token(request: OAuth2PasswordRequestForm = Depends()):
-    access_token=oauth2_scheme.create_access_token()
+@router.post("/login",response_model=Token)
+def login(request:Login,db:Session = Depends(get_db)):
+    user=get_user_by_email(db,request.email)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Incorrect email or password")
+    if not Hash.verify(request.password,user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Incorrect email or password")
+    access_token=create_access_token(data={"user_id": user.id})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+
+
+@router.post("/register", response_model=UserResponse)
+def register(user: UserCreate, db: Session = Depends(get_db)):
+
+    return create_user(db, user, role=UserRole.user)
