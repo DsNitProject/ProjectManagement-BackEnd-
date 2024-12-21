@@ -11,7 +11,7 @@ user_cache=HashMap()
 
 
 def get_user(db: Session, user_id: int):
-    cache_user=user_cache.users_byId(user_id)
+    cache_user=user_cache.get_user_by_id(user_id)
     if cache_user:
         return cache_user
     user=db.query(User).filter(User.id == user_id).first()
@@ -20,7 +20,7 @@ def get_user(db: Session, user_id: int):
     return user
 
 def get_user_by_email(db: Session, email: str):
-    cache_user=user_cache.users_byEmail(email)
+    cache_user=user_cache.get_user_by_email(email)
     if cache_user:
         return cache_user
     user=db.query(User).filter(User.email == email).first()
