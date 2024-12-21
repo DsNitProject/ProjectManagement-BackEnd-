@@ -2,11 +2,11 @@ import uvicorn
 from fastapi import FastAPI
 from pip._internal.network import auth
 
+from BackEnd import models
 from BackEnd.routers import authuser
-from models import user
 from database.database import engine
 app = FastAPI()
-user.Base.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=engine)
 app.include_router(authuser.router)
 @app.get("/")
 async def root():
