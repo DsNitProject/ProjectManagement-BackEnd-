@@ -19,3 +19,15 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr]
     password: Optional[str]
     role: Optional[UserRole]
+
+class UserResponse(UserBase):
+    id: int
+    role: UserRole
+
+class Login(BaseModel):
+    email: EmailStr
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
