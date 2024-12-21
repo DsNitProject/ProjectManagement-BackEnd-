@@ -66,6 +66,7 @@ def update_user(db: Session, db_user: User, user_update: UserUpdate):
 
 
 def delete_user(db: Session, db_user: User):
+    user_cache.delete_user(db_user)
     db.delete(db_user)
     db.commit()
     return {"detail": "کاربر با موفقیت حذف شد."}

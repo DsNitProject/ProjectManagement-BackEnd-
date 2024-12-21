@@ -10,3 +10,6 @@ class HashMap:
 
     def get_user_by_email(self, email):
         return self.users_byEmail.get(email)
+    def delete_user(self, user):
+        del self.users_byId[user.id]
+        del self.users_byEmail[user.id]
