@@ -28,7 +28,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(sqlEnum(UserRole), default=UserRole.user, nullable=False)
-
+    tasks = relationship("Task", back_populates="assignee")
 
 class Project(Base):
     __tablename__ = "projects"
