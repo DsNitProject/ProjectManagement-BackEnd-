@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum as sqlEnum, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Enum as sqlEnum, DateTime, ForeignKey, Date, Text
 from sqlalchemy.orm import relationship
 
 from BackEnd.database.database import Base
@@ -28,15 +28,21 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(sqlEnum(UserRole), default=UserRole.user, nullable=False)
+    projects = relationship("Project", back_populates="owner")
     tasks = relationship("Task", back_populates="assignee")
+
 
 class Project(Base):
     __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    description = Column(String, nullable=True)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    description = Column(Text, nullable=True)
+    owner_id = Column(Integer, ForeignKey("users.id"))
 
+    owner = relationship("User", back_populates="projects")
     tasks = relationship("Task", back_populates="project")
 
 
@@ -45,13 +51,12 @@ class Task(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    description = Column(String, nullable=True)
-    status = Column(sqlEnum(TaskStatus), default=TaskStatus.pending, nullable=False)
-    priority = Column(sqlEnum(TaskPriority), default=TaskPriority.normal, nullable=False)
-    deadline = Column(DateTime, nullable=True)
-
+    description = Column(Text, nullable=True)
+    status = Column(String, nullable=False, default=TaskStatus.pending.value)  # "pending"، "in_progress"، "done"
+    priority = Column(String, nullable=False, default=TaskPriority.normal.value)  # "low"، "normal"، "high"
+    deadline = Column(Date, nullable=True)
     project_id = Column(Integer, ForeignKey("projects.id"))
-    assignee_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    assignee_id = Column(Integer, ForeignKey("users.id"))
 
     project = relationship("Project", back_populates="tasks")
     assignee = relationship("User", back_populates="tasks")

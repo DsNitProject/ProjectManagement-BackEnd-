@@ -1,7 +1,8 @@
+from datetime import date
 from datetime import datetime
 
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 
 class UserRole(str, Enum):
@@ -31,16 +32,28 @@ class Login(BaseModel):
     password: str
 class ProjectBase(BaseModel):
     title: str
+    start_date: date
+    end_date: date
     description: Optional[str] = None
 
 class ProjectCreate(ProjectBase):
-    pass
+    owner_id: int
+
+class ProjectUpdate(BaseModel):
+    title: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    description: Optional[str] = None
 
 class ProjectResponse(ProjectBase):
     id: int
+    owner: UserResponse
+    tasks: List['TaskResponse'] = []
 
     class Config:
         orm_mode = True
+
+
 
 class TaskStatus(str, Enum):
     pending = "pending"
@@ -83,3 +96,7 @@ class Token(BaseModel):
     token_type: str
 class TokenData(BaseModel):
     user_id: Optional[int] = None
+
+
+ProjectResponse.update_forward_refs()
+TaskResponse.update_forward_refs()
