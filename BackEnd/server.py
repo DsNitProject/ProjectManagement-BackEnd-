@@ -4,9 +4,14 @@ from pip._internal.network import auth
 
 from BackEnd import models
 from BackEnd.routers import authuser, users
-from database.database import engine
-app = FastAPI()
+from database.database import engine, Base
+
 models.Base.metadata.create_all(bind=engine)
+
+
+
+app = FastAPI()
+
 app.include_router(authuser.router)
 app.include_router(users.router)
 @app.get("/")
