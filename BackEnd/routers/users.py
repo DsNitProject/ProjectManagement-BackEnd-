@@ -22,6 +22,12 @@ def admin_required(token: str = Depends(JWTBearer()), db: Session = Depends(get_
         raise HTTPException(status_code=403, detail="Admin privileges required")
     return user
 
+@router.get("/", response_model=List[UserResponse], dependencies=[Depends(admin_required)])
+def get_all_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return users
+
+
 @router.get("/{user_id}", response_model=UserResponse)
 def get_specefic_user(user_id: int, db: Session = Depends(get_db), token: str = Depends(JWTBearer())):
     payload = decode_jwt_token(token)
@@ -36,3 +42,16 @@ def get_specefic_user(user_id: int, db: Session = Depends(get_db), token: str = 
     if user.role != UserRole.admin and user.id != user_id:
         raise HTTPException(status_code=403, detail="Not authorized to view this user")
     return target_user
+@router.get("/me", response_model=UserResponse)
+def get_current_user(db: Session = Depends(get_db), current_user: User = Depends(JWTBearer())):
+    return current_user
+
+@router.put("/{user_id}", response_model=UserResponse)
+def update_specific_user(user_id: int, updates: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    target_user = get_user(db, user_id)
+    if not target_user:
+        raise HTTPException(status_code=404, detail="کاربر یافت نشد")
+    if current_user.role != UserRole.admin.value and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="دسترسی غیرمجاز")
+    updated_user = update_user(db, target_user, updates)
+    return updated_user
